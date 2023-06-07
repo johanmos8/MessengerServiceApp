@@ -1,5 +1,6 @@
 package com.example.domain.di
 
+import com.example.domain.repositories.IUserRepository
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -10,9 +11,5 @@ import javax.inject.Singleton
 @InstallIn(SingletonComponent::class)
 object DomainModule {
 
-    /*@Provides
-    @Singleton
-    fun provideSongUseCase(songRepository: ISongRepository): MusicUseCase {
-        return MusicUseCase(songRepository)
-    }*/
+
 }

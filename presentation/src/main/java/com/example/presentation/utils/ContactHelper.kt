@@ -1,15 +1,21 @@
 package com.example.presentation.utils
 
+import android.Manifest
+import android.annotation.SuppressLint
 import android.content.Context
+import android.content.pm.PackageManager
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.net.Uri
+import android.os.Build
 import android.provider.ContactsContract
-import android.util.Log
+import android.telephony.SubscriptionManager
+import androidx.core.app.ActivityCompat
 import java.io.IOException
 
 object ContactHelper {
 
+    @SuppressLint("Range")
     fun getContactPhoneNumber(contactUri: Uri, context: Context): String? {
         val contentResolver = context.contentResolver
         val projection = arrayOf(ContactsContract.Contacts.HAS_PHONE_NUMBER)
@@ -43,6 +49,7 @@ object ContactHelper {
         return null
     }
 
+    @SuppressLint("Range")
     fun getContactPhoto(contactUri: Uri, context: Context): Bitmap? {
         val contentResolver = context.contentResolver
 
@@ -80,4 +87,10 @@ object ContactHelper {
         }
         return null
     }
+
+    /**
+     * function that get owner's phone number. to initiate a new chat
+     */
+
+
 }

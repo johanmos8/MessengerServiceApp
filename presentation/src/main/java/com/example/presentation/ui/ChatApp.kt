@@ -98,12 +98,12 @@ fun ChatApp(
             ) { innerPadding ->
                 NavHost(
                     navController,
-                    startDestination = Screen.Profile.route,
+                    startDestination = Screen.Chat.route,
                     Modifier.padding(innerPadding)
                 ) {
                     composable(Screen.Profile.route) { ProfileScreen(navController) }
-                    composable(Screen.Message.route) { ChatScreen(navController) }
-                    composable(Screen.Message.route) { ChatScreen(navController) }
+                    composable(Screen.Chat.route) { ChatScreen(navController, mainViewModel) }
+                    composable(Screen.Message.route) {  }
                 }
 
 
