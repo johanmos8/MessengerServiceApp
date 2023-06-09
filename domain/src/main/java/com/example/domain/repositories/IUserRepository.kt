@@ -6,5 +6,5 @@ import kotlinx.coroutines.flow.Flow
 
 interface IUserRepository {
     suspend fun startNewChat(newChat: Chat)
-    suspend fun getAllChats(): Flow<List<Chat>>
+    suspend fun getAllChats(phoneNumber: String): Flow<List<Chat>>
 }

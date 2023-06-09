@@ -38,12 +38,13 @@ class MainViewModel @Inject constructor(
     val chatList: StateFlow<List<Chat>> = _chatList
 
     init {
-        /*viewModelScope.launch {
-            getAllChatsUseCase.invoke().collect { chats ->
+        viewModelScope.launch {
+            getAllChatsUseCase.invoke("3123445555").collect { chats ->
                 _chatList.value = chats
+                Log.d("VM","$chats")
             }
 
-        }*/
+        }
     }
 
     fun openContacts(pickContactLauncher: ActivityResultLauncher<Intent>) {

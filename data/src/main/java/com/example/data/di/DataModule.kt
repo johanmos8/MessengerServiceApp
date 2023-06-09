@@ -1,5 +1,6 @@
 package com.example.data.di
 
+import com.example.data.mappers.ChatFBListToChatListMapper
 import com.example.data.remotedatasource.ChatRemoteDataSourceImpl
 import com.example.data.remotedatasource.IChatRemoteDataSource
 import com.example.data.repositories.UserRepositoryImpl
@@ -23,9 +24,18 @@ object DomainModule {
 
     @Provides
     @Singleton
+    fun provideChatFBListToChatListMapper(): ChatFBListToChatListMapper {
+        return ChatFBListToChatListMapper()
+    }
+    @Provides
+    @Singleton
     fun provideUserRepository(
-        remoteDataSourceImpl: ChatRemoteDataSourceImpl
+        remoteDataSourceImpl: ChatRemoteDataSourceImpl,
+        chatFBListToChatListMapper: ChatFBListToChatListMapper
     ): IUserRepository {
-        return UserRepositoryImpl(remoteDataSourceImpl)
+        return UserRepositoryImpl(
+            remoteDataSourceImpl,
+            chatFBListToChatListMapper
+        )
     }
 }

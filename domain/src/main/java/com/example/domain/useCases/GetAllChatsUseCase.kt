@@ -7,6 +7,6 @@ import javax.inject.Inject
 class GetAllChatsUseCase @Inject constructor(
     private val iUserRepository: IUserRepository
 ) {
-    suspend operator fun invoke() = iUserRepository.getAllChats()
+    suspend operator fun invoke(phoneNumber: String) = iUserRepository.getAllChats(phoneNumber)
 
 }

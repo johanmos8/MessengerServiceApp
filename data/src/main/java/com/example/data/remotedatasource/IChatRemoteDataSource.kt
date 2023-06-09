@@ -1,9 +1,13 @@
 package com.example.data.remotedatasource
 
+import com.example.data.entities.ChatFB
 import com.example.domain.models.Chat
-import com.example.domain.models.UserContact
+import kotlinx.coroutines.flow.Flow
 
 interface IChatRemoteDataSource {
     suspend fun startNewChat(chat: Chat)
+
+    suspend fun getConversationsForUser(phoneNumber: String): Flow<List<ChatFB>>
+
 
 }
