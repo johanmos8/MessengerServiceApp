@@ -60,8 +60,7 @@ class MainViewModel @Inject constructor(
 
         startNewChat(
             UserContact(
-                userId = "usuario4",
-                name = name ?: "Unknown2",
+                name = name ?: "Unknown",
                 phoneNumber = phoneNumber ?: "",
                 profilePicture = photo.toString() ?: ""
             )
@@ -74,7 +73,6 @@ class MainViewModel @Inject constructor(
             val participants =
                 listOf(currentUser, contact) // Lista de participantes en la conversación
             val conversation = Chat(
-                chatId = "chat_prueba", // Generar un ID único para la conversación
                 participants = participants
             )
 
@@ -84,16 +82,12 @@ class MainViewModel @Inject constructor(
         }
     }
 
-    private fun generateConversationId(): String {
-        TODO()
-    }
-
     private fun getCurrentUser(): UserContact {
         return UserContact(
-            userId = "unique",
             name = "Propietario",
             phoneNumber = "3123445555",
-            profilePicture = ""
+            profilePicture = "",
+            owner=true
         )
     }
 

@@ -11,11 +11,11 @@ import com.example.presentation.ui.MainViewModel
 fun ChatScreen(navController: NavHostController, mainViewModel: MainViewModel) {
 
     val chats by mainViewModel.chatList.collectAsState()
-
     Column {
-        //SearchBar()
+        //SearchBarRow()
         ListConversations(
             chats
         )
     }
+
 }

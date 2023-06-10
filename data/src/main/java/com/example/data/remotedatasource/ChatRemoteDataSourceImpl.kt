@@ -2,6 +2,7 @@ package com.example.data.remotedatasource
 
 import android.util.Log
 import com.example.data.entities.ChatFB
+import com.example.data.entities.UserFB
 import com.example.domain.models.Chat
 import com.example.domain.models.Message
 
@@ -27,119 +28,172 @@ class ChatRemoteDataSourceImpl @Inject constructor() : IChatRemoteDataSource {
 
     override suspend fun startNewChat(chat: Chat) {
 
-        val conversationRef = database.child("chats")
-        // Generar un nuevo ID para la conversación
-        val conversationId = conversationRef.push().key
-        // Verificar que se haya obtenido el ID correctamente
-        if (conversationId != null) {
-            val chatData = ChatFB(
-                lastMessage = "Prueba"
-            )
-            // Actualizar la información del chat en la base de datos
-            conversationRef.child(conversationId).setValue(chatData)
-                //conversationRef.child(conversationId).setValue(childUpdates)
-                .addOnSuccessListener {
-                    Log.d("Insert", "exitoso")
+        val listUserKeys = addNewUsers(chat.participants)
+        if (listUserKeys.isNotEmpty()) {
+
+            val conversationRef = database.child("chats")
+            // Generar un nuevo ID para la conversación
+            val conversationId = conversationRef.push().key
+            // Verificar que se haya obtenido el ID correctamente
+            if (conversationId != null) {
+                val chatData = ChatFB(
+                    lastMessage = "Prueba"
+                )
+                // Actualizar la información del chat en la base de datos
+                conversationRef.child(conversationId).setValue(chatData)
+                    //conversationRef.child(conversationId).setValue(childUpdates)
+                    .addOnSuccessListener {
+                        Log.d("Insert", "exitoso")
+                    }
+                    .addOnFailureListener { exception ->
+                        Log.d("Insert", "fallo ${exception.message}")
+                    }
+                val membersRef = database.child("members")
+                listUserKeys.map {
+                    membersRef.child(conversationId).child(it).setValue(true)
                 }
-                .addOnFailureListener { exception ->
-                    Log.d("Insert", "fallo ${exception.message}")
-                }
-            val listUserKeys = addNewUsers(chat.participants)
-            val membersRef = database.child("members")
-            listUserKeys.map {
-                membersRef.child(conversationId).child(it).setValue(true)
+            } else {
+                // No se pudo obtener un ID válido para la conversación
+                // Manejar esta situación según corresponda
             }
-        } else {
-            // No se pudo obtener un ID válido para la conversación
-            // Manejar esta situación según corresponda
+
         }
-
-
     }
 
     override suspend fun getConversationsForUser(phoneNumber: String): Flow<List<ChatFB>> =
         callbackFlow {
 
             val conversationsRef = database.child("members")
+
             val userConversationsRef = conversationsRef.orderByChild(phoneNumber).equalTo(true)
             val chatList = mutableListOf<ChatFB>()
-            //adding listener
 
-            val childEventListener = object : ChildEventListener {
-                override fun onChildAdded(dataSnapshot: DataSnapshot, previousChildName: String?) {
-                    val chatId = dataSnapshot.key
-                    Log.d("Firebase-", "onChildAdded:" + dataSnapshot.key!!)
-                    val chatRef = database.child("chats").child(chatId!!)
-                    chatRef.addListenerForSingleValueEvent(object : ValueEventListener {
-                        override fun onDataChange(snapshot: DataSnapshot) {
-                            val title = snapshot.child("title").getValue(String::class.java)
+            userConversationsRef.addChildEventListener(object : ChildEventListener {
+                override fun onChildAdded(
+                    membersSnapshot: DataSnapshot,
+                    previousChildName: String?
+                ) {
+                    val chatId = membersSnapshot.key
+                    val membersTotal=membersSnapshot.childrenCount
+                    val participantIds = membersSnapshot.children.mapNotNull { childSnapshot ->
+                        val userId = childSnapshot.key
+                        val isParticipant = childSnapshot.getValue(Boolean::class.java)
+                        if (userId != null && isParticipant != null && isParticipant) {
+                            userId // Crear un objeto UserContact con el ID del usuario
+                        } else {
+                            null
+                        }
+                    }
+
+                    val chatsRef = database.child("chats").child(chatId!!)
+                    chatsRef.addListenerForSingleValueEvent(object : ValueEventListener {
+                        override fun onDataChange(chatSnapshot: DataSnapshot) {
                             val lastMessage =
-                                snapshot.child("lastMessage").getValue(String::class.java)
-                            val timestamp = snapshot.child("timestamp").getValue(Long::class.java)
+                                chatSnapshot.child("lastMessage").getValue(String::class.java)
+                            val timestamp =
+                                chatSnapshot.child("timestamp").getValue(Long::class.java)
 
-                            if (lastMessage != null && timestamp != null) {
-                                val chat = ChatFB(lastMessage, timestamp)
-                                chatList.add(chat)
-                            }
+                            val participants = mutableListOf<UserFB>()
+                            val usersRef = database.child("users")
+                            val participantQuery = usersRef.orderByKey().equalTo(participantIds[0])
 
-                            // Verificar si todos los chats han sido cargados
-                            if (chatList.size == dataSnapshot.childrenCount.toInt()) {
-                                chatList.sortByDescending { it.timestamp }
-                                trySend(chatList.toList()) // Enviar los chats al flujo
-                                close() // Cerrar el flujo después de enviar los chats
-                            }
+                            participantQuery.addListenerForSingleValueEvent(object :
+                                ValueEventListener {
+                                override fun onDataChange(participantsSnapshot: DataSnapshot) {
+                                    participantIds.forEach { userId ->
+                                        val participantSnapshot = participantsSnapshot.child(userId)
+                                        val name = participantSnapshot.child("name")
+                                            .getValue(String::class.java)
+                                        val phoneNumber = participantSnapshot.child("phoneNumber")
+                                            .getValue(String::class.java)
+                                        val profilePicture =
+                                            participantSnapshot.child("profilePicture")
+                                                .getValue(String::class.java)
+                                        val status = participantSnapshot.child("status")
+                                            .getValue(Boolean::class.java)
+                                        val owner = participantSnapshot.child("owner")
+                                            .getValue(Boolean::class.java)
+
+                                        if (name != null && phoneNumber != null) {
+                                            val participant = UserFB(
+                                                name = name,
+                                                phoneNumber = phoneNumber,
+                                                profilePicture = profilePicture,
+                                                status = status ?: true,
+                                                owner = owner ?: false
+                                            )
+                                            participants.add(participant)
+                                        }
+                                    }
+
+                                    if (lastMessage != null && timestamp != null && participants.isNotEmpty()) {
+                                        val chat = ChatFB(
+                                            lastMessage = lastMessage,
+                                            timestamp = timestamp,
+                                            participants = participants
+                                        )
+                                        chatList.add(chat)
+                                        trySend(chatList.toList())
+
+                                    }
+
+                                   /* if (chatList.size == membersSnapshot.childrenCount.toInt()) {
+                                        chatList.sortByDescending { it.timestamp }
+                                        trySend(chatList.toList())
+                                        close()
+                                    }*/
+                                }
+
+                                override fun onCancelled(error: DatabaseError) {
+                                    Log.d("Firebase-Error", "${error.message}")
+                                }
+                            })
                         }
 
                         override fun onCancelled(error: DatabaseError) {
-                            TODO("Not yet implemented")
+                            Log.d("Firebase-Error", "${error.message}")
                         }
                     })
-
-                    Log.d("Prueba", "onChildAdded:" + dataSnapshot.key!!)
-
-                    // A new comment has been added, add it to the displayed list
-                    //val comment = dataSnapshot.getValue<Comment>()
-
-                    // ...
                 }
 
                 override fun onChildChanged(snapshot: DataSnapshot, previousChildName: String?) {
-                    //TODO("Not yet implemented")
-                    Log.d("Firebase", "onChildChanged: ${snapshot.key}")
-
+                    TODO("Not yet implemented")
                 }
 
+
                 override fun onChildRemoved(snapshot: DataSnapshot) {
-                    //TODO("Not yet implemented")
-                    Log.d("Firebase", "onChildRemoved: ${snapshot.key}")
+                    TODO("Not yet implemented")
                 }
 
                 override fun onChildMoved(snapshot: DataSnapshot, previousChildName: String?) {
-                    //TODO("Not yet implemented")
-                    Log.d("Firebase", "onChildMoved: ${snapshot.key}")
-
+                    TODO("Not yet implemented")
                 }
 
-                override fun onCancelled(databaseError: DatabaseError) {
-                    Log.d("Firebase", "onChildMoved: ${databaseError}")
+                override fun onCancelled(error: DatabaseError) {
+                    TODO("Not yet implemented")
                 }
-            }
-            userConversationsRef.addChildEventListener(childEventListener)
+
+                // Resto de los métodos de ChildEventListener
+
+                // ...
+            })
+
             awaitClose()
-
         }.flowOn(Dispatchers.IO)
+
 
     fun addMessageToConversation(conversationId: String, message: Message) {
         val conversationRef = database.child("conversations/$conversationId/messages")
         val messageId =
-            conversationRef.push().key ?: return // Genera un ID único para el nuevo mensaje
+            conversationRef.push().key
+                ?: return // Genera un ID único para el nuevo mensaje
 
         // Actualiza el mensaje en la base de datos
         conversationRef.child(messageId).setValue(message)
     }
 
 
-    fun addNewUsers(users: List<UserContact>): List<String> {
+    private fun addNewUsers(users: List<UserContact>): List<String> {
         val userRef = database.child("users")
         val keys = mutableListOf<String>()
         users.forEach {
@@ -159,14 +213,3 @@ class ChatRemoteDataSourceImpl @Inject constructor() : IChatRemoteDataSource {
 
 }
 
-
-/*     override fun onDataChange(dataSnapshot: DataSnapshot) {
-         val conversationList = mutableListOf<Chat>()
-         for (conversationSnapshot in dataSnapshot.children) {
-             val conversation = conversationSnapshot.getValue(Chat::class.java)
-             conversation?.let {
-                 conversationList.add(it)
-             }
-         }
-         return conversationList
-     }*/

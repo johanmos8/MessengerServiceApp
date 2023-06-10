@@ -1,7 +1,6 @@
 package com.example.presentation.ui.screens
 
 import androidx.annotation.DrawableRes
-import androidx.annotation.StringRes
 import com.example.presentation.R
 
 sealed class Screen(val route: String, @DrawableRes val resourceId: Int?) {

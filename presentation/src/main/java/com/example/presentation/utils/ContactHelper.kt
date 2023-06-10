@@ -50,7 +50,7 @@ object ContactHelper {
     }
 
     @SuppressLint("Range")
-    fun getContactPhoto(contactUri: Uri, context: Context): Bitmap? {
+    fun getContactPhoto(contactUri: Uri, context: Context): Uri? {
         val contentResolver = context.contentResolver
 
         val projection = arrayOf(ContactsContract.CommonDataKinds.Phone.PHOTO_URI)
@@ -59,14 +59,14 @@ object ContactHelper {
                 val photoUriString =
                     cursor.getString(cursor.getColumnIndex(ContactsContract.CommonDataKinds.Phone.PHOTO_URI))
                 if (photoUriString != null) {
-                    val photoUri = Uri.parse(photoUriString)
-                    return try {
+                    return Uri.parse(photoUriString)
+                   /* return try {
                         val inputStream = contentResolver.openInputStream(photoUri)
                         BitmapFactory.decodeStream(inputStream)
                     } catch (e: IOException) {
                         e.printStackTrace()
                         null
-                    }
+                    }*/
                 }
             }
         }
