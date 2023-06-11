@@ -74,7 +74,7 @@ class ChatRemoteDataSourceImpl @Inject constructor() : IChatRemoteDataSource {
                     previousChildName: String?
                 ) {
                     val chatId = membersSnapshot.key
-                    val membersTotal=membersSnapshot.childrenCount
+                    val membersTotal = membersSnapshot.childrenCount
                     val participantIds = membersSnapshot.children.mapNotNull { childSnapshot ->
                         val userId = childSnapshot.key
                         val isParticipant = childSnapshot.getValue(Boolean::class.java)
@@ -135,13 +135,14 @@ class ChatRemoteDataSourceImpl @Inject constructor() : IChatRemoteDataSource {
                                         chatList.add(chat)
                                         trySend(chatList.toList())
 
+
                                     }
 
-                                   /* if (chatList.size == membersSnapshot.childrenCount.toInt()) {
-                                        chatList.sortByDescending { it.timestamp }
-                                        trySend(chatList.toList())
-                                        close()
-                                    }*/
+                                    /* if (chatList.size == chatSnapshot.childrenCount.toInt()) {
+                                          chatList.sortByDescending { it.timestamp }
+                                          trySend(chatList.toList())
+                                          close()
+                                      }*/
                                 }
 
                                 override fun onCancelled(error: DatabaseError) {
@@ -157,7 +158,38 @@ class ChatRemoteDataSourceImpl @Inject constructor() : IChatRemoteDataSource {
                 }
 
                 override fun onChildChanged(snapshot: DataSnapshot, previousChildName: String?) {
-                    TODO("Not yet implemented")
+                    // Implementación vacía de onChildChanged
+                /* val chatId=snapshot.key
+                    val participantIds = snapshot.children.mapNotNull { childSnapshot ->
+                        val userId = childSnapshot.key
+                        val isParticipant = childSnapshot.getValue(Boolean::class.java)
+                        if (userId != null && isParticipant != null && isParticipant) {
+                            userId // Crear un objeto UserContact con el ID del usuario
+                        } else {
+                            null
+                        }
+                    }
+                    val chatsRef = database.child("chats").child(chatId!!)
+                    chatsRef.addListenerForSingleValueEvent(object : ValueEventListener {
+                        override fun onDataChange(chatSnapshot: DataSnapshot) {
+                            val lastMessage = chatSnapshot.child("lastMessage").getValue(String::class.java)
+                            val timestamp = chatSnapshot.child("timestamp").getValue(Long::class.java)
+
+                            // Buscar el chat correspondiente en la lista existente y actualizar sus propiedades
+                            val updatedChat = chatList.find { it.participants.map { participant -> participant.phoneNumber } == participantIds }
+                            updatedChat?.let {
+                                it.lastMessage = lastMessage ?: ""
+                                it.timestamp = timestamp ?: 0L
+                            }
+
+                            // Notificar que los datos han cambiado
+                            trySend(chatList.toList())
+                        }
+
+                        override fun onCancelled(error: DatabaseError) {
+                            Log.d("Firebase-Error", "${error.message}")
+                        }
+                    })*/
                 }
 
 
@@ -196,18 +228,25 @@ class ChatRemoteDataSourceImpl @Inject constructor() : IChatRemoteDataSource {
     private fun addNewUsers(users: List<UserContact>): List<String> {
         val userRef = database.child("users")
         val keys = mutableListOf<String>()
-        users.forEach {
-            //val userKey = userRef.push().key
-            keys.add(it.phoneNumber)
-            database.child("users").child(it.phoneNumber).setValue(it)
-                .addOnSuccessListener { exception ->
-                    Log.d("Insert", "exitoso usuario $it")
-                }.addOnFailureListener { exception ->
-                    Log.d("Insert", "fallo usuario $it-${exception.message}")
+        val updates = HashMap<String, Any?>()
 
-                }
+        users.forEach { user ->
+            //val userKey = userRef.push().key
+            val phoneNumber = user.phoneNumber
+            keys.add(phoneNumber)
+            val userValues =
+                user.toMap() // Asume que tienes un método "toMap()" en la clase UserContact
+            updates["$phoneNumber"] = userValues
+
 
         }
+        database.child("users").updateChildren(updates)
+            .addOnSuccessListener {
+                Log.d("Insert", "Exitoso: ${keys.joinToString()}")
+            }
+            .addOnFailureListener { exception ->
+                Log.d("Insert", "Fallo: ${keys.joinToString()}-${exception.message}")
+            }
         return keys
     }
 

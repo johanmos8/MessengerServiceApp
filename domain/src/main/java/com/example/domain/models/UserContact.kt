@@ -6,6 +6,16 @@ data class UserContact(
     val profilePicture: String?,
     val status: Boolean? =true,
     val owner: Boolean?=false
-)
+){
+    fun toMap(): Map<String, Any?> {
+        val map = HashMap<String, Any?>()
+        map["name"] = name
+        map["phoneNumber"] = phoneNumber
+        map["profilePicture"] = profilePicture
+        map["status"] = status
+        map["owner"] = owner
+        return map
+    }
+}
 
 

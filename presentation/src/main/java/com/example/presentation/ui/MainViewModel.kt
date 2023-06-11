@@ -1,13 +1,17 @@
 package com.example.presentation.ui
 
+import android.Manifest
 import android.app.Activity
 import android.content.Context
 import android.content.Intent
+import android.content.pm.PackageManager
 import android.net.Uri
 import android.provider.ContactsContract
 import android.util.Log
 import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.core.app.ActivityCompat
+import androidx.core.content.ContextCompat
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.domain.models.Chat
@@ -41,7 +45,7 @@ class MainViewModel @Inject constructor(
         viewModelScope.launch {
             getAllChatsUseCase.invoke("3123445555").collect { chats ->
                 _chatList.value = chats
-                Log.d("VM","$chats")
+                Log.d("VM", "$chats")
             }
 
         }
@@ -54,17 +58,32 @@ class MainViewModel @Inject constructor(
 
     fun getContactDetails(contactUri: Uri, context: Context) {
 
-        val phoneNumber = ContactHelper.getContactPhoneNumber(contactUri, context)
-        val name = ContactHelper.getContactName(contactUri, context)
-        val photo = ContactHelper.getContactPhoto(contactUri, context)
-
-        startNewChat(
-            UserContact(
-                name = name ?: "Unknown",
-                phoneNumber = phoneNumber ?: "",
-                profilePicture = photo.toString() ?: ""
+        // Verificar si el permiso está otorgado
+        if (ContextCompat.checkSelfPermission(
+                context,
+                Manifest.permission.READ_CONTACTS
+            ) != PackageManager.PERMISSION_GRANTED
+        ) {
+            // Si el permiso no está otorgado, solicitarlo al usuario
+            ActivityCompat.requestPermissions(
+                context as Activity,
+                arrayOf(Manifest.permission.READ_CONTACTS),
+                123
             )
-        )
+        } else {
+            val phoneNumber = ContactHelper.getContactPhoneNumber(contactUri, context)
+            val name = ContactHelper.getContactName(contactUri, context)
+            val photo = ContactHelper.getContactPhoto(contactUri, context)
+            startNewChat(
+                UserContact(
+                    name = name ?: "Unknown",
+                    phoneNumber = phoneNumber ?: "",
+                    profilePicture = photo.toString() ?: ""
+                )
+            )
+        }
+
+
     }
 
     private fun startNewChat(contact: UserContact) {
@@ -87,7 +106,7 @@ class MainViewModel @Inject constructor(
             name = "Propietario",
             phoneNumber = "3123445555",
             profilePicture = "",
-            owner=true
+            owner = true
         )
     }
 
