@@ -15,6 +15,7 @@ import androidx.core.content.ContextCompat
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.domain.models.Chat
+import com.example.domain.models.Message
 import com.example.domain.models.UserContact
 import com.example.domain.useCases.GetAllChatsUseCase
 import com.example.domain.useCases.StartNewChatUseCase
@@ -101,7 +102,12 @@ class MainViewModel @Inject constructor(
         }
     }
 
+    fun addMessage(msg: Message) {
+        Log.d("Message", "nuevo mensaje: ${msg.content}")
+    }
+
     private fun getCurrentUser(): UserContact {
+        //TODO("Current User")
         return UserContact(
             name = "Propietario",
             phoneNumber = "3123445555",

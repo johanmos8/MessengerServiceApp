@@ -10,40 +10,42 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.dp
+import com.example.domain.models.Message
+import com.example.presentation.ui.MainViewModel
 
 @Composable
-fun MessageScreen() {
+fun MessageScreen(
+    mainViewModel: MainViewModel
+) {
     Scaffold(
         contentWindowInsets = ScaffoldDefaults
             .contentWindowInsets.exclude(
                 WindowInsets.navigationBars
-            ),
+            ).exclude(WindowInsets.ime),
         topBar = { /* Floating Action Button */ },
     ) { innerPadding ->
 
         Column(
             modifier = Modifier
                 .fillMaxSize()
+                .padding(innerPadding)
                 .background(MaterialTheme.colorScheme.background)
 
         ) {
-            Box(
-                modifier = Modifier
-                    .background(Color.Magenta)
-                    .fillMaxWidth()
-            ) {
-
-            }
             //SearchBarRow()
-            ListMessages()
-            //UserInput()
+            ListMessages(modifier = Modifier.weight(1f))
+            UserInput(
+                modifier = Modifier
+                    .navigationBarsPadding()
+                    .imePadding(),
+                onMessageSent = { content ->
+                    mainViewModel.addMessage(
+                        Message(content = content)
+                    )
+                }
+            )
         }
     }
 }
 
-
-@Preview
-@Composable
-fun MessageScreenPreview() {
-    MessageScreen()
-}

@@ -67,7 +67,7 @@ fun ChatApp(
                 composable(Screen.Chat.route) { ChatScreen(navController, mainViewModel) }
                 composable(Screen.Message.route) {
                     showNavigationBar.value = false
-                    MessageScreen()
+                    MessageScreen(mainViewModel = mainViewModel)
                 }
 
             }
