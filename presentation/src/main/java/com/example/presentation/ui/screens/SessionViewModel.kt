@@ -1,5 +1,6 @@
 package com.example.presentation.ui.screens
 
+import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.domain.models.UserContact
@@ -11,7 +12,9 @@ import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import javax.inject.Inject
 
 @HiltViewModel
@@ -27,19 +30,30 @@ class SessionViewModel @Inject constructor(
     private val _owner = MutableStateFlow<UserContact?>(null)
     val owner: MutableStateFlow<UserContact?> = _owner
 
-    fun LogIn(username: String, password: String) {
-        viewModelScope.launch(Dispatchers.IO) {
-            val successLogin = logInUserUseCase.invoke(username, password)
-            if (successLogin) {
+    private val _isLogged = MutableStateFlow(false)
+    val isLogged: StateFlow<Boolean> = _isLogged
 
-                _owner.value?.let {
-                    _sessionData.value = SessionState(true, it, password)
+    private val _errorMessage = MutableStateFlow<String>("")
+    val errorMessage: StateFlow<String> get() = _errorMessage
+    fun logIn(username: String, password: String) {
+        viewModelScope.launch(Dispatchers.IO) {
+            val successLogin = logInUserUseCase.invoke(username, password)?.collect {
+                _owner.value = it
+                if (_owner.value != null) {
+
+                    withContext(Dispatchers.Main) {
+                        _isLogged.value = true
+                        _sessionData.value = SessionState(true, it, password)
+                    }
+                } else {
+                    _isLogged.value = false
                 }
             }
+
         }
     }
 
-    fun LogOut() {
+    fun logOut() {
         viewModelScope.launch(Dispatchers.IO) {
             logOutUserUseCase.invoke()
 
@@ -47,17 +61,29 @@ class SessionViewModel @Inject constructor(
         }
     }
 
-    fun SignUpUser() {
+    fun signUpUser() {
 
         val owner = UserContact(
             name = "Leiner Mosquera",
             phoneNumber = "3223153245",
             profilePicture = ""
         )
+        _owner.value = owner
+        Log.d("DataStore", "user$owner")
         viewModelScope.launch(Dispatchers.IO) {
-            signUpUseCase.invoke(owner)
+            val response = signUpUseCase.invoke(owner)
+            if (!response) {
+                _errorMessage.value = "The request failed. Please try again."
+            } else {
+                _errorMessage.value = ""
+            }
 
         }
 
     }
+}
+sealed class ViewState {
+    object Loading: ViewState() // hasLoggedIn = unknown
+    object LoggedIn: ViewState() // hasLoggedIn = true
+    object NotLoggedIn: ViewState() // hasLoggedIn = false
 }

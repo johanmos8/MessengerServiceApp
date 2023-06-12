@@ -128,6 +128,7 @@ class ChatRemoteDataSourceImpl @Inject constructor() : IChatRemoteDataSource {
 
                                     if (lastMessage != null && timestamp != null && participants.isNotEmpty()) {
                                         val chat = ChatFB(
+                                            chatId = chatId,
                                             lastMessage = lastMessage,
                                             timestamp = timestamp,
                                             participants = participants
@@ -159,37 +160,37 @@ class ChatRemoteDataSourceImpl @Inject constructor() : IChatRemoteDataSource {
 
                 override fun onChildChanged(snapshot: DataSnapshot, previousChildName: String?) {
                     // Implementación vacía de onChildChanged
-                /* val chatId=snapshot.key
-                    val participantIds = snapshot.children.mapNotNull { childSnapshot ->
-                        val userId = childSnapshot.key
-                        val isParticipant = childSnapshot.getValue(Boolean::class.java)
-                        if (userId != null && isParticipant != null && isParticipant) {
-                            userId // Crear un objeto UserContact con el ID del usuario
-                        } else {
-                            null
+                    /* val chatId=snapshot.key
+                        val participantIds = snapshot.children.mapNotNull { childSnapshot ->
+                            val userId = childSnapshot.key
+                            val isParticipant = childSnapshot.getValue(Boolean::class.java)
+                            if (userId != null && isParticipant != null && isParticipant) {
+                                userId // Crear un objeto UserContact con el ID del usuario
+                            } else {
+                                null
+                            }
                         }
-                    }
-                    val chatsRef = database.child("chats").child(chatId!!)
-                    chatsRef.addListenerForSingleValueEvent(object : ValueEventListener {
-                        override fun onDataChange(chatSnapshot: DataSnapshot) {
-                            val lastMessage = chatSnapshot.child("lastMessage").getValue(String::class.java)
-                            val timestamp = chatSnapshot.child("timestamp").getValue(Long::class.java)
+                        val chatsRef = database.child("chats").child(chatId!!)
+                        chatsRef.addListenerForSingleValueEvent(object : ValueEventListener {
+                            override fun onDataChange(chatSnapshot: DataSnapshot) {
+                                val lastMessage = chatSnapshot.child("lastMessage").getValue(String::class.java)
+                                val timestamp = chatSnapshot.child("timestamp").getValue(Long::class.java)
 
-                            // Buscar el chat correspondiente en la lista existente y actualizar sus propiedades
-                            val updatedChat = chatList.find { it.participants.map { participant -> participant.phoneNumber } == participantIds }
-                            updatedChat?.let {
-                                it.lastMessage = lastMessage ?: ""
-                                it.timestamp = timestamp ?: 0L
+                                // Buscar el chat correspondiente en la lista existente y actualizar sus propiedades
+                                val updatedChat = chatList.find { it.participants.map { participant -> participant.phoneNumber } == participantIds }
+                                updatedChat?.let {
+                                    it.lastMessage = lastMessage ?: ""
+                                    it.timestamp = timestamp ?: 0L
+                                }
+
+                                // Notificar que los datos han cambiado
+                                trySend(chatList.toList())
                             }
 
-                            // Notificar que los datos han cambiado
-                            trySend(chatList.toList())
-                        }
-
-                        override fun onCancelled(error: DatabaseError) {
-                            Log.d("Firebase-Error", "${error.message}")
-                        }
-                    })*/
+                            override fun onCancelled(error: DatabaseError) {
+                                Log.d("Firebase-Error", "${error.message}")
+                            }
+                        })*/
                 }
 
 

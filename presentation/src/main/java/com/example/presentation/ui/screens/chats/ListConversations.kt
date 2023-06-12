@@ -1,7 +1,7 @@
 package com.example.presentation.ui.screens.chats
 
+import android.net.Uri
 import androidx.compose.foundation.Image
-import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
@@ -15,36 +15,38 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import coil.compose.rememberAsyncImagePainter
 import coil.compose.rememberImagePainter
+import coil.request.ImageRequest
+import coil.size.Size
 import com.example.domain.models.Chat
 import com.example.domain.models.UserContact
 import com.example.presentation.R
-import java.io.File
 import java.text.SimpleDateFormat
 import java.util.*
 
 @Composable
 fun ListConversations(
+    navigateToMessage: (String) -> Unit,
     chats: List<Chat>
 ) {
     val format = SimpleDateFormat("hh:mm a", Locale.getDefault())
 
     LazyColumn {
         itemsIndexed(chats) { index: Int, chat ->
-            val contact: UserContact?= chat.participants.firstOrNull { it.owner == false }
+            val contact: UserContact? = chat.participants.firstOrNull { it.owner == false }
 
             Card(
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(4.dp)
                     .clickable {
-
+                        navigateToMessage(chat.chatId)
                     }
 
             ) {
@@ -55,13 +57,20 @@ fun ListConversations(
                         .fillMaxWidth()
                 ) {
 
-                    val painterContact=   if(contact?.profilePicture==null){
-                        // Cargar la imagen desde la URI en un Bitmap
-                        painterResource(id = R.drawable.ic_profile_24)
+                    val painterContact =
+                        if (contact?.profilePicture == null || contact.profilePicture!!.isEmpty()) {
+                            // Cargar la imagen desde la URI en un Bitmap
+                            painterResource(id = R.drawable.ic_profile_24)
 
-                    }else{
-                        rememberAsyncImagePainter(contact?.profilePicture)
-                    }
+                        } else {
+                            rememberAsyncImagePainter(
+                                model = ImageRequest.Builder(LocalContext.current)
+                                    .data(Uri.parse(contact.profilePicture))
+                                    .size(Size.ORIGINAL) // Set the target size to load the image at.
+                                    .build()
+                            )
+
+                        }
 
                     Image(
                         painter = painterContact,
@@ -76,7 +85,7 @@ fun ListConversations(
                     Column(modifier = Modifier.weight(1f)) {
 
                         Text(
-                            text = contact?.name?:"Unknown",
+                            text = contact?.name ?: "Unknown",
                             fontWeight = FontWeight.Bold
                         )
                         Spacer(modifier = Modifier.height(4.dp))
@@ -94,7 +103,11 @@ fun ListConversations(
                             text =
                             format.format(Date(chat.timestamp))
                         )
-                        Text(text = "++")
+                        Row {
+                            Text(text = "\u2714") // Chulito gris
+                            Text(text = "\u2714") // Chulito gris
+                        }
+
                     }
 
                 }

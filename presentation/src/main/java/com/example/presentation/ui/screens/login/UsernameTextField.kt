@@ -18,14 +18,17 @@ import com.example.presentation.R
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalComposeUiApi::class)
 @Composable
-fun UserNameTextField() {
-    var username by remember { mutableStateOf("") }
+fun UserNameTextField(
+    value: String,
+    onValueChange: (String) -> Unit
+) {
+
     val keyboardController = LocalSoftwareKeyboardController.current
 
 
     OutlinedTextField(
-        value = username,
-        onValueChange = { username = it },
+        value = value,
+        onValueChange = onValueChange,
         shape = RoundedCornerShape(topEnd = 12.dp, bottomStart = 12.dp),
         label = {
             Text(

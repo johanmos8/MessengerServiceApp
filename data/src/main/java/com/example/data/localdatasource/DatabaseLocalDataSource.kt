@@ -1,6 +1,7 @@
 package com.example.data.localdatasource
 
 import android.content.Context
+import android.util.Log
 import androidx.datastore.core.DataStore
 import androidx.datastore.preferences.core.Preferences
 import androidx.datastore.preferences.core.booleanPreferencesKey
@@ -36,17 +37,26 @@ class DatabaseLocalDataSource @Inject constructor(
     }
 
     // Función para almacenar un valor en DataStore
-    suspend fun saveUser(user: UserContact) {
-        dataStore.edit { preferences ->
-            preferences[UserPreferencesKeys.NAME] = user.name
-            preferences[UserPreferencesKeys.PHONE_NUMBER] = user.phoneNumber
-            preferences[UserPreferencesKeys.PROFILE_PICTURE] = user.profilePicture.toString()
-            preferences[UserPreferencesKeys.STATUS] = user.status ?: true
-            preferences[UserPreferencesKeys.OWNER] = user.owner ?: false
-            preferences[UserPreferencesKeys.IS_LOGGED_IN] = true
-            preferences[UserPreferencesKeys.PASSWORD] = "123345"
+    suspend fun saveUser(user: UserContact): Boolean {
+        try {
 
+            dataStore.edit { preferences ->
+                preferences[UserPreferencesKeys.NAME] = user.name
+                preferences[UserPreferencesKeys.PHONE_NUMBER] = user.phoneNumber
+                preferences[UserPreferencesKeys.PROFILE_PICTURE] = user.profilePicture.toString()
+                preferences[UserPreferencesKeys.STATUS] = user.status ?: true
+                preferences[UserPreferencesKeys.OWNER] = user.owner ?: false
+                preferences[UserPreferencesKeys.IS_LOGGED_IN] = true
+                preferences[UserPreferencesKeys.PASSWORD] = "123345"
+
+            }
+            return true
+        } catch (e: Exception) {
+            return false
+            Log.e("DataStore", "Error: " + e.message)
         }
+
+
     }
 
     val userFlow: Flow<UserContact?>
@@ -88,7 +98,7 @@ class DatabaseLocalDataSource @Inject constructor(
         }
     }
 
-    suspend fun login(username: String, password: String): Boolean {
+    suspend fun login(username: String, password: String): Flow<UserContact>? {
         val storedUsername = dataStore.data.first()[UserPreferencesKeys.NAME]
         val storedPassword = dataStore.data.first()[UserPreferencesKeys.PASSWORD]
 
@@ -96,10 +106,22 @@ class DatabaseLocalDataSource @Inject constructor(
             dataStore.edit { preferences ->
                 preferences[UserPreferencesKeys.IS_LOGGED_IN] = true
             }
-            return true
+            Log.d("DataStore", "Logged: $username")
+
+            return dataStore.data.map {
+                UserContact(
+                    name = it[UserPreferencesKeys.NAME].orEmpty(),
+                    phoneNumber = it[UserPreferencesKeys.PHONE_NUMBER].orEmpty(),
+                    profilePicture = it[UserPreferencesKeys.PROFILE_PICTURE].orEmpty(),
+                    status = it[UserPreferencesKeys.STATUS] ?: true,
+                    owner = it[UserPreferencesKeys.OWNER] ?: false
+                )
+            }
         } else {
+            Log.d("DataStore", "No Logged: $username")
             logout()
         }
-        return false
+        return null
     }
+
 }

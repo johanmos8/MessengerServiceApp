@@ -11,6 +11,7 @@ class ChatFBListToChatListMapper @Inject constructor() {
 
         return listChats.map { chat ->
             Chat(
+                chatId=chat.chatId,
                 lastMessage = chat.lastMessage,
                 timestamp = chat.timestamp,
                 participants = chat.participants.convertToUserContact()

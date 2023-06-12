@@ -78,7 +78,7 @@ class MainViewModel @Inject constructor(
                 UserContact(
                     name = name ?: "Unknown",
                     phoneNumber = phoneNumber ?: "",
-                    profilePicture = photo.toString() ?: ""
+                    profilePicture = photo?.toString() ?: ""
                 )
             )
         }

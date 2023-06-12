@@ -7,6 +7,7 @@ class ChatFBToChatMapper {
     operator fun invoke(chat: ChatFB): Chat {
         with(chat) {
             return Chat(
+                chatId=this.chatId,
                 lastMessage = this.lastMessage,
                 timestamp = this.timestamp
             )

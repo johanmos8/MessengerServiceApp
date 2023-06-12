@@ -18,14 +18,16 @@ import androidx.compose.ui.unit.dp
 //password
 @OptIn(ExperimentalComposeUiApi::class)
 @Composable
-fun PasswordTextField() {
-    var password by remember { mutableStateOf("") }
+fun PasswordTextField(
+    value: String,
+    onValueChange: (String) -> Unit
+) {
     val keyboardController = LocalSoftwareKeyboardController.current
     var passwordHidden by remember { mutableStateOf(true) }
 
     OutlinedTextField(
-        value = password,
-        onValueChange = { password = it },
+        value = value,
+        onValueChange = onValueChange,
         shape = RoundedCornerShape(topEnd = 12.dp, bottomStart = 12.dp),
         label = {
             Text(
