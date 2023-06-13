@@ -24,7 +24,7 @@ fun MessageScreen(
             .contentWindowInsets.exclude(
                 WindowInsets.navigationBars
             ).exclude(WindowInsets.ime),
-        topBar = { /* Floating Action Button */ },
+        topBar = { MessageHeader(mainViewModel) },
     ) { innerPadding ->
 
         Column(
@@ -49,4 +49,5 @@ fun MessageScreen(
         }
     }
 }
+
 

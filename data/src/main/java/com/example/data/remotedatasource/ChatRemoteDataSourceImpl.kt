@@ -262,8 +262,6 @@ class ChatRemoteDataSourceImpl @Inject constructor() : IChatRemoteDataSource {
 
                     message?.let { it -> messageList.add(it) }
                     trySend(messageList.toList())
-
-                    Log.d("Message", "onChildAdded $message")
                 }
 
                 override fun onChildChanged(snapshot: DataSnapshot, previousChildName: String?) {

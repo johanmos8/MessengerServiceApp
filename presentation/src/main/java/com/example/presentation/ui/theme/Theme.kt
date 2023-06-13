@@ -16,6 +16,7 @@ private val LightColorPalette = lightColorScheme(
     primary = PrimaryBlue,
     background = PrimaryBackground,
     secondary = Teal200,
+    surface = PrimaryStroke
 
     /* Other default colors to override
     background = Color.White,

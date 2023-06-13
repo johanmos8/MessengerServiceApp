@@ -1,11 +1,13 @@
 package com.example.presentation.ui.screens.messages
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -25,7 +27,7 @@ fun ListMessages(
     val scope = rememberCoroutineScope()
     val scrollState = rememberLazyListState()
     Box(
-        modifier = modifier
+        modifier = modifier.background(MaterialTheme.colorScheme.surface)
 
 
         //.background(MaterialTheme.colorScheme.background)

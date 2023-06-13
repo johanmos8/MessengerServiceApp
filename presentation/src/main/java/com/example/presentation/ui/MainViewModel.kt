@@ -27,6 +27,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import javax.inject.Inject
 
 // Constants
@@ -41,8 +42,8 @@ class MainViewModel @Inject constructor(
     private val getAllMessageByChatUseCase: GetAllMessageByChatUseCase
 ) : ViewModel() {
 
-    private val _selectedContact = MutableStateFlow<Uri?>(null)
-    val selectedContact: StateFlow<Uri?> = _selectedContact
+    private val _selectedContact = MutableStateFlow<UserContact?>(null)
+    val selectedContact: StateFlow<UserContact?> = _selectedContact
 
     private val _chatList = MutableStateFlow<List<Chat>>(emptyList())//listOf<Song>())
     val chatList: StateFlow<List<Chat>> = _chatList
@@ -51,9 +52,11 @@ class MainViewModel @Inject constructor(
     val messageList: StateFlow<List<Message>> = _messageList
 
     init {
-        viewModelScope.launch {
+        viewModelScope.launch(Dispatchers.IO) {
             getAllChatsUseCase.invoke("3123445555").collect { chats ->
-                _chatList.value = chats
+                withContext(Dispatchers.Main) {
+                    _chatList.value = chats
+                }
                 Log.d("VM", "$chats")
             }
 
@@ -96,7 +99,7 @@ class MainViewModel @Inject constructor(
     }
 
     private fun startNewChat(contact: UserContact) {
-        viewModelScope.launch {
+        viewModelScope.launch(Dispatchers.IO) {
             val currentUser = getCurrentUser() // Obtener el usuario actual en sesión
             val participants =
                 listOf(currentUser, contact) // Lista de participantes en la conversación
@@ -128,12 +131,16 @@ class MainViewModel @Inject constructor(
 
     fun getMessageListByChat(chatId: String) {
         viewModelScope.launch(Dispatchers.IO) {
-            _messageList.value= emptyList()
+            _messageList.value = emptyList()
             getAllMessageByChatUseCase.invoke(chatId).collect {
                 _messageList.value = it
-                Log.d("Message2","$it")
+                Log.d("Message2", "$it")
             }
         }
+    }
+
+    fun setSelectedContact(contact: UserContact?) {
+        _selectedContact.value = contact
     }
 
 }

@@ -12,6 +12,9 @@ import androidx.compose.material3.Card
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.State
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -21,23 +24,23 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import coil.compose.rememberAsyncImagePainter
-import coil.compose.rememberImagePainter
 import coil.request.ImageRequest
 import coil.size.Size
 import com.example.domain.models.Chat
 import com.example.domain.models.UserContact
 import com.example.presentation.R
+import com.example.presentation.ui.MainViewModel
 import java.text.SimpleDateFormat
 import java.util.*
 
 @Composable
 fun ListConversations(
+    mainViewModel: MainViewModel,
     navigateToMessage: (String) -> Unit,
     chats: List<Chat>
 ) {
     val format = SimpleDateFormat("hh:mm a", Locale.getDefault())
-
-    LazyColumn {
+     LazyColumn {
         itemsIndexed(chats) { index: Int, chat ->
             val contact: UserContact? = chat.participants.firstOrNull { it.owner == false }
 
@@ -46,6 +49,8 @@ fun ListConversations(
                     .fillMaxWidth()
                     .padding(4.dp)
                     .clickable {
+                        mainViewModel.setSelectedContact(contact)
+
                         navigateToMessage(chat.chatId)
                     }
 
