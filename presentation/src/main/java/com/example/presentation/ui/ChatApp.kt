@@ -20,12 +20,13 @@ import androidx.compose.ui.res.painterResource
 import androidx.navigation.NavController
 import androidx.navigation.NavDestination.Companion.hierarchy
 import androidx.navigation.NavGraph.Companion.findStartDestination
+import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
+import androidx.navigation.navArgument
 import com.example.presentation.utils.Screen
-import com.example.presentation.ui.screens.SessionViewModel
 import com.example.presentation.ui.screens.chats.ChatScreen
 import com.example.presentation.ui.screens.messages.MessageScreen
 import com.example.presentation.ui.screens.profile.ProfileScreen
@@ -65,9 +66,12 @@ fun ChatApp(
 
                 composable(Screen.Profile.route) { ProfileScreen(navController) }
                 composable(Screen.Chat.route) { ChatScreen(navController, mainViewModel) }
-                composable(Screen.Message.route) {
+                composable(
+                    Screen.Message.route,
+                    arguments = listOf(navArgument("chatId") { type = NavType.StringType })
+                ) {
                     showNavigationBar.value = false
-                    MessageScreen(mainViewModel = mainViewModel)
+                    MessageScreen(mainViewModel = mainViewModel, chatId=it.arguments?.getString("chatId"))
                 }
 
             }

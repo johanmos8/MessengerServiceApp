@@ -56,7 +56,11 @@ fun UserInput(
                     )
                     // Send button
                     FilledIconButton(
-                        onClick = { onMessageSent(text.text) },
+                        onClick = {
+                            onMessageSent(text.text)
+                            text = TextFieldValue("")
+
+                        },
                         modifier = Modifier
                             .size(30.dp)
                             .align(Alignment.CenterEnd)

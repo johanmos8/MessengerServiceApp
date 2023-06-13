@@ -6,6 +6,7 @@ import androidx.datastore.preferences.core.Preferences
 import com.example.data.localdatasource.DatabaseLocalDataSource
 import com.example.data.localdatasource.dataStore
 import com.example.data.mappers.ChatFBListToChatListMapper
+import com.example.data.mappers.MessageFBListToMessageListMapper
 import com.example.data.remotedatasource.ChatRemoteDataSourceImpl
 import com.example.data.remotedatasource.IChatRemoteDataSource
 import com.example.data.repositories.SessionRepositoryImpl
@@ -38,20 +39,30 @@ object DomainModule {
 
     @Provides
     @Singleton
+    fun provideMessageFBListToMessageListMapper(): MessageFBListToMessageListMapper {
+        return MessageFBListToMessageListMapper()
+    }
+
+    @Provides
+    @Singleton
     fun provideUserRepository(
         remoteDataSourceImpl: ChatRemoteDataSourceImpl,
-        chatFBListToChatListMapper: ChatFBListToChatListMapper
+        chatFBListToChatListMapper: ChatFBListToChatListMapper,
+        messageFBListToMessageListMapper: MessageFBListToMessageListMapper
     ): IUserRepository {
         return UserRepositoryImpl(
             remoteDataSourceImpl,
-            chatFBListToChatListMapper
+            chatFBListToChatListMapper,
+            messageFBListToMessageListMapper
         )
     }
+
     @Provides
     @Singleton
     fun provideDataStore(@ApplicationContext context: Context): DataStore<Preferences> {
         return context.dataStore
     }
+
     @Provides
     @Singleton
     fun provideSessionRepository(

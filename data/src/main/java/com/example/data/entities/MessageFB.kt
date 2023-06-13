@@ -1,8 +1,8 @@
-package com.example.domain.models
+package com.example.data.entities
 
 import java.util.*
 
-data class Message(
+data class MessageFB(
     val chatId: String="",
     val userId: String="",
     val content: String="",

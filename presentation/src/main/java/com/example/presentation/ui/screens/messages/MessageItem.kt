@@ -11,12 +11,17 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
+import com.example.domain.models.Message
+import java.text.SimpleDateFormat
+import java.util.*
 
 @Composable
 fun MessageItem(
-    //message: Message
+    message: Message
 
 ) {
+    val format = SimpleDateFormat("hh:mm a", Locale.getDefault())
+
     val backgroundMsgColor = if (true) {
         MaterialTheme.colorScheme.primary
     } else {
@@ -35,13 +40,17 @@ fun MessageItem(
         ) {
             Column(modifier = Modifier.padding(8.dp)) {
                 Surface(
-                    modifier = Modifier.padding(8.dp).wrapContentWidth(),
+                    modifier = Modifier
+                        .padding(8.dp)
+                        .wrapContentWidth(),
                     color = backgroundMsgColor,
                     shape = RoundedCornerShape(4.dp, 20.dp, 20.dp, 20.dp)
                 ) {
                     Text(
-                        text = "When I got interrupted due to a meeting or a new requirenment from my pM or client.\n" +
+                        /*text = "When I got interrupted due to a meeting or a new requirenment from my pM or client.\n" +
                             "In such situations, I need to be able to quickly adapt and adjust my schedule so that I can still meet my deadlines and deliverables.",
+                       */
+                        text = message.content,
                         modifier = Modifier.padding(15.dp)
                     )
                 }
@@ -49,7 +58,10 @@ fun MessageItem(
 
             }
             Spacer(modifier = Modifier.height(4.dp))
-            Text(text = "1:32PM ", modifier = Modifier.align(Alignment.End))
+            Text(
+                text = format.format(Date(message.timestamp)),
+                modifier = Modifier.align(Alignment.End)
+            )
         }
     }
 

@@ -2,22 +2,23 @@ package com.example.presentation.ui.screens.messages
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
-import androidx.compose.material3.FabPosition
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.ScaffoldDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.tooling.preview.Preview
-import androidx.compose.ui.unit.dp
 import com.example.domain.models.Message
 import com.example.presentation.ui.MainViewModel
 
 @Composable
 fun MessageScreen(
-    mainViewModel: MainViewModel
+    mainViewModel: MainViewModel,
+    chatId: String?
 ) {
+    mainViewModel.getMessageListByChat(chatId!!)
+    val messages by mainViewModel.messageList.collectAsState()
     Scaffold(
         contentWindowInsets = ScaffoldDefaults
             .contentWindowInsets.exclude(
@@ -34,14 +35,14 @@ fun MessageScreen(
 
         ) {
             //SearchBarRow()
-            ListMessages(modifier = Modifier.weight(1f))
+            ListMessages(messages = messages, modifier = Modifier.weight(1f))
             UserInput(
                 modifier = Modifier
                     .navigationBarsPadding()
                     .imePadding(),
                 onMessageSent = { content ->
                     mainViewModel.addMessage(
-                        Message(content = content)
+                        Message(chatId = chatId, content = content)
                     )
                 }
             )

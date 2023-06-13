@@ -2,25 +2,18 @@ package com.example.data.remotedatasource
 
 import android.util.Log
 import com.example.data.entities.ChatFB
+import com.example.data.entities.MessageFB
 import com.example.data.entities.UserFB
 import com.example.domain.models.Chat
 import com.example.domain.models.Message
-
 import com.example.domain.models.UserContact
-import com.google.firebase.database.ChildEventListener
-import com.google.firebase.database.DataSnapshot
-import com.google.firebase.database.DatabaseError
-import com.google.firebase.database.DatabaseReference
-import com.google.firebase.database.ValueEventListener
+import com.google.firebase.database.*
 import com.google.firebase.database.ktx.getValue
-import io.reactivex.rxjava3.annotations.NonNull
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.callbackFlow
-import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.flowOn
-import java.util.concurrent.CountDownLatch
 import javax.inject.Inject
 
 class ChatRemoteDataSourceImpl @Inject constructor() : IChatRemoteDataSource {
@@ -214,13 +207,18 @@ class ChatRemoteDataSourceImpl @Inject constructor() : IChatRemoteDataSource {
             awaitClose()
         }.flowOn(Dispatchers.IO)
 
-
-    fun addMessageToConversation(conversationId: String, message: Message) {
-        val conversationRef = database.child("conversations/$conversationId/messages")
+    override suspend fun addMessageToConversation(message: Message) {
+        val conversationRef = database.child("messages/${message.chatId}")
         val messageId =
             conversationRef.push().key
                 ?: return // Genera un ID único para el nuevo mensaje
-
+        val updatedData = mapOf<String, Any>(
+            "lastMessage" to message.content,
+            "timestamp" to message.timestamp
+        )
+        database.child("chats").child(message.chatId).updateChildren(
+            updatedData
+        )
         // Actualiza el mensaje en la base de datos
         conversationRef.child(messageId).setValue(message)
     }
@@ -251,5 +249,40 @@ class ChatRemoteDataSourceImpl @Inject constructor() : IChatRemoteDataSource {
         return keys
     }
 
+    override suspend fun getMessageByChat(chatId: String): Flow<List<MessageFB>> =
+        callbackFlow<List<MessageFB>> {
+            val messageList = mutableListOf<MessageFB>()
+
+            val messagesRef = database.child("messages")
+
+            messagesRef.child(chatId).addChildEventListener(object : ChildEventListener {
+                override fun onChildAdded(snapshot: DataSnapshot, previousChildName: String?) {
+                    val chatKey = snapshot.key
+                    val message = snapshot.getValue<MessageFB>()
+
+                    message?.let { it -> messageList.add(it) }
+                    trySend(messageList.toList())
+
+                    Log.d("Message", "onChildAdded $message")
+                }
+
+                override fun onChildChanged(snapshot: DataSnapshot, previousChildName: String?) {
+                    TODO("Not yet implemented")
+                }
+
+                override fun onChildRemoved(snapshot: DataSnapshot) {
+                    TODO("Not yet implemented")
+                }
+
+                override fun onChildMoved(snapshot: DataSnapshot, previousChildName: String?) {
+                    TODO("Not yet implemented")
+                }
+
+                override fun onCancelled(error: DatabaseError) {
+                    TODO("Not yet implemented")
+                }
+            })
+            awaitClose()
+        }.flowOn(Dispatchers.IO)
 }
 
