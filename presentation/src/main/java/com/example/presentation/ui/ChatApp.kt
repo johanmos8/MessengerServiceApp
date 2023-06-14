@@ -32,10 +32,11 @@ fun ChatApp(
     )
     val navController = rememberNavController()
     val showNavigationBar = remember { mutableStateOf(true) }
+    val showTopBar = remember { mutableStateOf(true) }
 
     Scaffold(
         topBar = {
-            if (showNavigationBar.value) {
+            if (showTopBar.value) {
                 ChatTopBar(mainViewModel=mainViewModel)
             }
         },
@@ -63,10 +64,14 @@ fun ChatApp(
             ) {
 
                 composable(Screen.Profile.route) {
+                    showNavigationBar.value = true
+                    showTopBar.value=false
                     ProfileScreen(navController)
                 }
                 composable(Screen.Chat.route) {
                     showNavigationBar.value = true
+                    showTopBar.value=true
+
                     mainViewModel.getChatsByUser()
                     ChatScreen(navController, mainViewModel)
                 }
@@ -75,6 +80,7 @@ fun ChatApp(
                     arguments = listOf(navArgument("chatId") { type = NavType.StringType })
                 ) {
                     showNavigationBar.value = false
+                    showTopBar.value=false
                     MessageScreen(
                         mainViewModel = mainViewModel,
                         chatId = it.arguments?.getString("chatId")
