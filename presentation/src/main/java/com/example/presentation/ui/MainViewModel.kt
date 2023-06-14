@@ -26,6 +26,7 @@ import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import javax.inject.Inject
@@ -51,11 +52,16 @@ class MainViewModel @Inject constructor(
     private val _messageList = MutableStateFlow<List<Message>>(emptyList())//listOf<Song>())
     val messageList: StateFlow<List<Message>> = _messageList
 
-    init {
+    private val originalChatList =
+        MutableStateFlow<List<Chat>>(emptyList()) // Valor original de la lista
+
+
+    fun getChatsByUser() {
         viewModelScope.launch(Dispatchers.IO) {
             getAllChatsUseCase.invoke("3123445555").collect { chats ->
                 withContext(Dispatchers.Main) {
                     _chatList.value = chats
+                    originalChatList.value = chats
                 }
                 Log.d("VM", "$chats")
             }
@@ -94,7 +100,7 @@ class MainViewModel @Inject constructor(
                 )
             )
         }
-
+        this.getChatsByUser()
 
     }
 
@@ -141,6 +147,24 @@ class MainViewModel @Inject constructor(
 
     fun setSelectedContact(contact: UserContact?) {
         _selectedContact.value = contact
+    }
+
+    fun onSearch(searchText: String) {
+        if (searchText.isNotEmpty()) {
+            val filteredList = chatList.value.filter { chat ->
+                chat.chatId.contains(searchText, ignoreCase = true) ||
+                        chat.participants.any { participant ->
+                            participant.name.contains(searchText, ignoreCase = true) ||
+                                    participant.phoneNumber.contains(searchText, ignoreCase = true)
+                        } ||
+                        chat.lastMessage.contains(searchText, ignoreCase = true)
+            }
+            _chatList.value = filteredList
+
+        } else {
+            _chatList.value = originalChatList.value// Restablecer la lista completa de chats
+        }
+
     }
 
 }

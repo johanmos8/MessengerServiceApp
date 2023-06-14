@@ -48,7 +48,7 @@ fun ListMessages(
         if (messages.isNotEmpty()) {
             LaunchedEffect(Unit) {
                 scope.launch {
-                    scrollState.animateScrollToItem(messages.size - 1)
+                    scrollState.animateScrollToItem(0)
                 }
             }
         }

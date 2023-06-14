@@ -20,7 +20,6 @@ fun ChatScreen(navController: NavHostController, mainViewModel: MainViewModel) {
         navController.navigate(Screen.Message.createRoute(chatId))
     }
     Column {
-        //SearchBarRow()
         ListConversations(
             mainViewModel,
             navigateToMessage = navigateToMessage,

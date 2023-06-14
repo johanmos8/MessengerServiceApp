@@ -30,7 +30,7 @@ class ChatRemoteDataSourceImpl @Inject constructor() : IChatRemoteDataSource {
             // Verificar que se haya obtenido el ID correctamente
             if (conversationId != null) {
                 val chatData = ChatFB(
-                    lastMessage = "Prueba"
+                    lastMessage = ""
                 )
                 // Actualizar la información del chat en la base de datos
                 conversationRef.child(conversationId).setValue(chatData)
@@ -184,6 +184,8 @@ class ChatRemoteDataSourceImpl @Inject constructor() : IChatRemoteDataSource {
                                 Log.d("Firebase-Error", "${error.message}")
                             }
                         })*/
+                    Log.d("onChildChanged", "chats: $snapshot")
+
                 }
 
 
@@ -265,7 +267,7 @@ class ChatRemoteDataSourceImpl @Inject constructor() : IChatRemoteDataSource {
                 }
 
                 override fun onChildChanged(snapshot: DataSnapshot, previousChildName: String?) {
-                    TODO("Not yet implemented")
+                    Log.d("onChildChanged", "messages: $snapshot")
                 }
 
                 override fun onChildRemoved(snapshot: DataSnapshot) {
