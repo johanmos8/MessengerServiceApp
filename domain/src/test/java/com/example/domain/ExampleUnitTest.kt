@@ -14,4 +14,13 @@ class ExampleUnitTest {
     fun addition_isCorrect() {
         assertEquals(4, 2 + 2)
     }
+    fun `given a phone number when get all chats use case is invoked then the x repository function is called`(){
+        /*
+        * crear mock repositorio
+        * crear instancia del usecase
+        * every getAllChats-> function del repository
+        * when: llamar la funcion que queremos testear usecase.invoke()
+        * then
+        * */
+    }
 }

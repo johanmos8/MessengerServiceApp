@@ -17,7 +17,7 @@ fun ComposeNavigationApp(
     // Lógica para determinar a qué pantalla navegar según el estado de isLoggedIn
 
 
-    if (true) {//TODO("Cambiar a isLogged")
+    if (isLogged) {//TODO("Cambiar a isLogged")
         // Navegar a HomeScreen
         ChatApp(
             mainViewModel = mainViewModel,
